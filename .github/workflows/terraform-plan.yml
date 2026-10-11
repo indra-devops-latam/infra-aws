@@ -6,7 +6,9 @@ on:
       - develop
       - main
     paths:
-      - "infra-aws/**"
+      - "*.tf"
+      - "*.hcl"
+      - "env/**"
 
 permissions:
   id-token: write
