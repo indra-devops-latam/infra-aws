@@ -39,6 +39,7 @@ jobs:
     uses: ./.github/workflows/plan.yml
     with:
       environment: dev
+      aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
 
   plan-prod:
     name: "Terraform Plan PROD"
@@ -51,3 +52,4 @@ jobs:
     uses: ./.github/workflows/plan.yml
     with:
       environment: prod
+      aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
