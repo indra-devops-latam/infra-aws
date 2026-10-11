@@ -12,15 +12,9 @@ Actualmente, `services` incluye `client-gateway`. Otros nombres de microservicio
 
 ## Requisitos
 
-- Terraform CLI `1.5.0` o posterior.
+- Terraform CLI `1.15.8` o posterior.
 - AWS CLI configurado con credenciales y permisos para administrar VPC, EKS, EC2, IAM y ECR.
 - Acceso a la región y cuotas de AWS necesarias para crear los recursos.
-
-El proveedor AWS en `provider.tf` utiliza la región definida por variables y el perfil local `adrian-fullstack`. Para usar ese perfil, configúralo con AWS CLI:
-
-```powershell
-aws configure --profile adrian-fullstack
-```
 
 Si tu perfil tiene otro nombre, actualiza `provider.tf` antes de ejecutar Terraform. No guardes claves de AWS en este repositorio.
 
