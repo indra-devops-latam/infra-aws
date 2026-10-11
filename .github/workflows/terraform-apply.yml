@@ -25,8 +25,6 @@ jobs:
     uses: ./.github/workflows/apply.yml
     with:
       environment: dev
-      terraform_version: "1.15.8"
-      aws_region: us-east-1
 
   apply-prod:
     name: "Apply PROD"
@@ -34,5 +32,3 @@ jobs:
     uses: ./.github/workflows/apply.yml
     with:
       environment: prod
-      terraform_version: "1.15.8"
-      aws_region: us-east-1
