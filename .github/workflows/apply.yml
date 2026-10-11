@@ -16,6 +16,10 @@ on:
         required: true
         type: string
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   terraform_version: "1.15.8"
   aws_region: us-east-1
