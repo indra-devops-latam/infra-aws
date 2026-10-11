@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/apply.yml
     with:
       environment: dev
-      aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
+    secrets: inherit
 
   apply-prod:
     name: "Apply PROD"
@@ -33,4 +33,4 @@ jobs:
     uses: ./.github/workflows/apply.yml
     with:
       environment: prod
-      aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
+    secrets: inherit
