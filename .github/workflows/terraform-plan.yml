@@ -39,8 +39,6 @@ jobs:
     uses: ./.github/workflows/plan.yml
     with:
       environment: dev
-      terraform_version: "1.15.8"
-      aws_region: us-east-1
 
   plan-prod:
     name: "Terraform Plan PROD"
@@ -53,5 +51,3 @@ jobs:
     uses: ./.github/workflows/plan.yml
     with:
       environment: prod
-      terraform_version: "1.15.8"
-      aws_region: us-east-1
