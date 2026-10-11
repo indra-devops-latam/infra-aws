@@ -1,0 +1,94 @@
+name: "Terraform - Validate & Plan"
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - "infra/**"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  TF_VERSION: "1.6.0"
+  AWS_REGION: us-east-1
+
+jobs:
+  plan:
+    name: "Plan (${{ github.base_ref }})"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+
+    strategy:
+      matrix:
+        include:
+          - branch: develop
+            env_file: dev.tfvars
+            workspace: dev
+          - branch: main
+            env_file: prod.tfvars
+            workspace: prod
+    
+    if: github.base_ref == 'develop' || github.base_ref == 'main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Run Terraform Tests
+        run: terraform test
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var-file="${{ matrix.env_file }}" -no-color
+        continue-on-error: false
+
+      - name: Comment Plan on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const output = `### 🌐 Terraform Plan for Environment: \`${{ matrix.workspace }}\`
+            Status: \`${{ steps.plan.outcome }}\`
+            Target Branch: \`${{ github.base_ref }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`hcl
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}

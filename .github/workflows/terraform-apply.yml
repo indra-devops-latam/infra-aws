@@ -1,0 +1,51 @@
+name: "Terraform - Apply Infrastructure"
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'infra/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  apply:
+    name: "Apply (${{ github.ref_name }})"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+
+    strategy:
+      matrix:
+        include:
+          - branch: main
+            env_file: prod.tfvars
+            workspace: prod
+
+    if: github.base_ref == 'develop' || github.base_ref == 'main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsTerraformRole
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -var-file="${{ matrix.env_file }}" -auto-approve
