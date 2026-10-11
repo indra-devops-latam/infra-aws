@@ -22,7 +22,7 @@ jobs:
   apply-dev:
     name: "Apply DEV"
     if: github.ref == 'refs/heads/develop'
-    uses: ./.github/workflows/shared/apply.yml
+    uses: ./.github/workflows/apply.yml
     with:
       environment: dev
       terraform_version: "1.15.8"
@@ -31,7 +31,7 @@ jobs:
   apply-prod:
     name: "Apply PROD"
     if: github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/shared/apply.yml
+    uses: ./.github/workflows/apply.yml
     with:
       environment: prod
       terraform_version: "1.15.8"
