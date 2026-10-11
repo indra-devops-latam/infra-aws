@@ -53,7 +53,7 @@ jobs:
           terraform_version: 1.6.0
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -reconfigure -backend-config=backend-${{ matrix.workspace }}.hcl
 
       - name: Run Terraform Tests
         run: terraform test

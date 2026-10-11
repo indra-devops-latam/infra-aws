@@ -23,6 +23,9 @@ jobs:
     strategy:
       matrix:
         include:
+          - branch: develop
+            env_file: dev.tfvars
+            workspace: dev
           - branch: main
             env_file: prod.tfvars
             workspace: prod
@@ -45,7 +48,7 @@ jobs:
           terraform_version: 1.6.0
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -reconfigure -backend-config=backend-${{ matrix.workspace }}.hcl
 
       - name: Terraform Apply
         run: terraform apply -var-file="${{ matrix.env_file }}" -auto-approve
