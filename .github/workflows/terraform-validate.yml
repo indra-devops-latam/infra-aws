@@ -40,7 +40,7 @@ jobs:
           terraform_version: ${{env.TF_VERSION}}
 
       - name: Terraform Init
-        run: terraform init -reconfigure -backend-config=backend-${{ matrix.workspace }}.hcl
+        run: terraform init -reconfigure -backend-config=backend-dev.hcl
 
       - name: Run Terraform Tests
         run: terraform test
