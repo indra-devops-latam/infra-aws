@@ -44,3 +44,28 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 }
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.0"
+
+  cluster_name    = var.cluster_name
+  cluster_version = "1.30" # O la versión que prefieras de Kubernetes
+
+  cluster_endpoint_public_access = true
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  # Configuración de los Node Groups administrados
+  eks_managed_node_groups = {
+    default = {
+      min_size     = var.min_size
+      max_size     = var.max_size
+      desired_size = var.desired_size
+
+      instance_types = var.instance_types
+      capacity_type  = "ON_DEMAND"
+    }
+  }
+}
