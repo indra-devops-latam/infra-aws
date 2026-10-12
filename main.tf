@@ -50,7 +50,7 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.37"
+  cluster_version = "1.31" # O la versión que prefieras de Kubernetes
 
   cluster_endpoint_public_access = true
 
