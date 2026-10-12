@@ -5,6 +5,12 @@ variables {
   private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
   public_subnet_cidrs  = ["10.0.3.0/24", "10.0.4.0/24"]
   azs                  = ["us-east-1a", "us-east-1b"]
+
+  cluster_name         = "test-cluster-eks"
+  min_size             = 1
+  max_size             = 3
+  desired_size         = 2
+  instance_types       = ["t3.medium"]
 }
 
 # 1. Prueba de validación para los repositorios ECR de los microservicios
