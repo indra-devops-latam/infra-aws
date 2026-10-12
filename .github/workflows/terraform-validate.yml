@@ -1,0 +1,58 @@
+name: "Terraform - Validate"
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+    paths:
+      - '**.tf'
+      - '**.hcl'
+      - 'env/**'
+      - '.github/workflows/terraform-validate.yml'
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  TF_VERSION: "1.15.8"
+  AWS_REGION: us-east-1
+
+jobs:
+  plan:
+    name: "Validate Feature"
+    if: >-
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/heads/feature/')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{env.TF_VERSION}}
+
+      - name: Terraform Init
+        run: terraform init -reconfigure -backend-config=backend-dev.hcl
+
+      - name: Run Terraform Tests
+        run: terraform test
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate

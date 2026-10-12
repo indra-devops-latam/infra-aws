@@ -1,0 +1,82 @@
+name: "Terraform - Plan Reusable"
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Terraform environment"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  terraform_version: "1.15.8"
+  aws_region: us-east-1
+
+jobs:
+  plan-dev:
+    name: "Terraform Plan ${{inputs.environment}}"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{env.aws_region}}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{env.terraform_version}}
+
+      - name: Terraform Init
+        run: terraform init -reconfigure -backend-config=backend-${{inputs.environment}}.hcl
+
+      - name: Run Terraform Tests
+        run: terraform test
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var-file="env/${{inputs.environment}}.tfvars" -no-color
+        continue-on-error: false
+
+      - name: Comment Plan on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const output = `### 🌐 Terraform Plan for Environment: \`${{ inputs.environment }}\`
+            Status: \`${{ steps.plan.outcome }}\`
+            Target Branch: \`${{ github.base_ref }}\`
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`hcl
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
