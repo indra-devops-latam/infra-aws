@@ -68,4 +68,22 @@ module "eks" {
       capacity_type  = "ON_DEMAND"
     }
   }
+
+  authentication_mode = "API_AND_CONFIG_MAP"
+
+  access_entries = {
+    github_actions = {
+      principal_arn = "arn:aws:iam::211125299560:role/GitHubActionsTerraformRole"
+
+      policy_associations = {
+        cluster_admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
 }
