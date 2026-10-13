@@ -1,6 +1,6 @@
 module "ecr_repos" {
   source  = "terraform-aws-modules/ecr/aws"
-  version = "~> 2.0"
+  version = "~> 3.2.0"
 
   for_each = toset(var.services)
 
@@ -30,7 +30,7 @@ module "ecr_repos" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "~> 6.7.3"
 
   name = "vpc-${var.environment}"
   cidr = var.cidr_block
@@ -43,16 +43,28 @@ module "vpc" {
   single_nat_gateway   = true # Ponlo en false si en prod quieres un NAT Gateway por cada Zona de Disponibilidad
   enable_dns_hostnames = true
   enable_dns_support   = true
+
+  # Subnets públicas: ALB internet-facing
+  public_subnet_tags = {
+    "kubernetes.io/role/elb"                    = "1"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+  }
+
+  # Subnets privadas: recursos internos
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb"           = "1"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+  }
 }
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
+  version = "~> 21.29.0"
 
-  cluster_name    = var.cluster_name
-  cluster_version = "1.31" # O la versión que prefieras de Kubernetes
+  name               = var.cluster_name
+  kubernetes_version = "1.31" # O la versión que prefieras de Kubernetes
 
-  cluster_endpoint_public_access = true
+  endpoint_public_access = false # Solo acceso privado al API Server
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
@@ -69,11 +81,15 @@ module "eks" {
     }
   }
 
+  kms_key_administrators = var.kms_key_administrators
+
+  enable_irsa = true
+
   authentication_mode = "API_AND_CONFIG_MAP"
 
   access_entries = {
     github_actions = {
-      principal_arn = "arn:aws:iam::211125299560:role/GitHubActionsTerraformRole"
+      principal_arn = var.kms_key_administrators[0]
 
       policy_associations = {
         cluster_admin = {
@@ -86,4 +102,54 @@ module "eks" {
       }
     }
   }
+}
+
+
+module "aws_load_balancer_controller_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "~> 6.0"
+
+  name            = "${var.cluster_name}-aws-load-balancer-controller"
+  use_name_prefix = false
+
+  attach_load_balancer_controller_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn = module.eks.oidc_provider_arn
+      namespace_service_accounts = [
+        "kube-system:aws-load-balancer-controller"
+      ]
+    }
+  }
+}
+
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  version    = "3.6.0"
+  namespace  = "kube-system"
+
+  values = [
+    yamlencode({
+      clusterName = var.cluster_name
+      region      = var.aws_region
+      vpcId       = module.vpc.vpc_id
+
+      serviceAccount = {
+        create = true
+        name   = "aws-load-balancer-controller"
+
+        annotations = {
+          "eks.amazonaws.com/role-arn" = module.aws_load_balancer_controller_irsa.arn
+        }
+      }
+    })
+  ]
+
+  depends_on = [
+    module.eks,
+    module.aws_load_balancer_controller_irsa
+  ]
 }

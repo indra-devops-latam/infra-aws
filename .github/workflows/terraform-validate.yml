@@ -16,9 +16,9 @@ permissions:
   pull-requests: write
 
 env:
-  TF_VERSION: "1.15.8"
-  AWS_REGION: us-east-1
-
+  TF_VERSION: ${{ vars.TERRAFORM_VERSION }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  TF_VAR_kms_key_administrators: ${{ vars.KMS_KEY_ADMINISTRATORS }}
 jobs:
   plan:
     name: "Validate Feature"

@@ -23,10 +23,6 @@ permissions:
   contents: read
   pull-requests: write
 
-env:
-  TF_VERSION: "1.15.8"
-  AWS_REGION: us-east-1
-
 jobs:
   plan-dev:
     name: "Terraform Plan DEV"

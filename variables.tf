@@ -54,3 +54,8 @@ variable "min_size" {
 variable "max_size" {
   type = number
 }
+
+variable "kms_key_administrators" {
+  description = "ARNs de los roles o usuarios que administran la clave KMS"
+  type        = list(string)
+}
