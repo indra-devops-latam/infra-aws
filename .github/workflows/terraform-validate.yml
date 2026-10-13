@@ -16,8 +16,8 @@ permissions:
   pull-requests: write
 
 env:
-  TF_VERSION: "1.15.8"
-  AWS_REGION: us-east-1
+  TF_VERSION: ${{ vars.TERRAFORM_VERSION }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
 
 jobs:
   plan:

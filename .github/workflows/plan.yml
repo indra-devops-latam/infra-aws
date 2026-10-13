@@ -14,8 +14,9 @@ permissions:
   pull-requests: write
 
 env:
-  terraform_version: "1.15.8"
-  aws_region: us-east-1
+  terraform_version: ${{ vars.TERRAFORM_VERSION }}
+  aws_region: ${{ vars.AWS_REGION }}
+  TF_VAR_kms_key_administrators: ${{ vars.KMS_KEY_ADMINISTRATORS }}
 
 jobs:
   plan-dev:

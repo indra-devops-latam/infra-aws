@@ -14,10 +14,6 @@ permissions:
   id-token: write
   contents: read
 
-env:
-  TF_VERSION: "1.15.8"
-  AWS_REGION: us-east-1
-
 jobs:
   apply-dev:
     name: "Apply DEV"
