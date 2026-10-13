@@ -64,7 +64,7 @@ module "eks" {
   name               = var.cluster_name
   kubernetes_version = "1.31" # O la versión que prefieras de Kubernetes
 
-  endpoint_public_access = false # Solo acceso privado al API Server
+  endpoint_public_access = true # Solo acceso privado al API Server
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
