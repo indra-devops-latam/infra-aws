@@ -10,6 +10,7 @@ variable "services" {
     "products-ms",
     "payments-ms",
     "nats-broker"
+    
 */
 variable "environment" {
   type = string
