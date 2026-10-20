@@ -74,11 +74,11 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-   # ✅ AGREGAR ESTO — Addons esenciales de EKS
+  # ✅ AGREGAR ESTO — Addons esenciales de EKS
   addons = {
     vpc-cni = {
-      most_recent              = true
-      before_compute           = true   # Se instala ANTES de los nodos
+      most_recent                 = true
+      before_compute              = true # Se instala ANTES de los nodos
       resolve_conflicts_on_create = "OVERWRITE"
       resolve_conflicts_on_update = "OVERWRITE"
     }
@@ -156,7 +156,7 @@ module "aws_load_balancer_controller_irsa" {
   use_name_prefix = false
 
   attach_load_balancer_controller_policy = true
-  permissions = {}
+  permissions                            = {}
 
   oidc_providers = {
     main = {
