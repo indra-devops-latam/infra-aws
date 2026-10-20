@@ -1,7 +1,8 @@
 variable "services" {
   type = list(string)
   default = [
-    "client-gateway"
+    "client-gateway",
+    "auth-ms"
   ]
 }
 /*
