@@ -1,8 +1,7 @@
 variable "services" {
   type = list(string)
   default = [
-    "client-gateway",
-    "auth-ms"
+    "client-gateway"
   ]
 }
 /*
@@ -11,6 +10,7 @@ variable "services" {
     "products-ms",
     "payments-ms",
     "nats-broker"
+    
 */
 variable "environment" {
   type = string
