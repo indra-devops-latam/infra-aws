@@ -8,6 +8,11 @@ azs                  = ["us-east-1a", "us-east-1b"]
 
 cluster_name   = "cluster-dev"
 instance_types = ["t3.medium"]
-desired_size   = 2
+desired_size   = 1
 min_size       = 1
 max_size       = 3
+
+kms_key_administrators = [
+    "arn:aws:iam::216010984466:role/GitHubActionsTerraformRole",
+    "arn:aws:iam::216010984466:user/terraform"
+  ]

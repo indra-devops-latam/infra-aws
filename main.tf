@@ -62,12 +62,35 @@ module "eks" {
   version = "~> 21.29.0"
 
   name               = var.cluster_name
-  kubernetes_version = "1.32" # O la versión que prefieras de Kubernetes
+  kubernetes_version = "1.37" # O la versión que prefieras de Kubernetes
 
-  endpoint_public_access = true # Solo acceso privado al API Server
+  endpoint_public_access = true
+  # Solo acceso privado al API Server
+  # endpoint_public_access_cidrs=[
+  #   "38.25.4.119/32",
+  #   "163.116.229.143/32"
+  # ]
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
+
+   # ✅ AGREGAR ESTO — Addons esenciales de EKS
+  addons = {
+    vpc-cni = {
+      most_recent              = true
+      before_compute           = true   # Se instala ANTES de los nodos
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
+    }
+    kube-proxy = {
+      most_recent                 = true
+      resolve_conflicts_on_update = "OVERWRITE"
+    }
+    coredns = {
+      most_recent                 = true
+      resolve_conflicts_on_update = "OVERWRITE"
+    }
+  }
 
   # Configuración de los Node Groups administrados
   eks_managed_node_groups = {
@@ -101,6 +124,26 @@ module "eks" {
         }
       }
     }
+    local_terraform = {
+      principal_arn = var.kms_key_administrators[1]
+
+      policy_associations = {
+        cluster_admin_view = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+          access_scope = {
+            type = "cluster"
+          }
+        }
+        admin_view = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminViewPolicy"
+
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
   }
 }
 
@@ -113,6 +156,7 @@ module "aws_load_balancer_controller_irsa" {
   use_name_prefix = false
 
   attach_load_balancer_controller_policy = true
+  permissions = {}
 
   oidc_providers = {
     main = {

@@ -8,6 +8,6 @@ azs                  = ["us-east-1a", "us-east-1b"]
 
 cluster_name   = "cluster-prod"
 instance_types = ["t3.large"]
-desired_size   = 3
+desired_size   = 2
 min_size       = 2
 max_size       = 6
